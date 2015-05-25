@@ -11,11 +11,12 @@
  */
 module.exports = function(roles){
   return function(req, res, next) {
-    
+
     /**
      * Default configuration
      */
     var noPermissionRedirect  = null;
+    var noPermissionStatus    = 401;
     var role                  = 'role';
 
     /**
@@ -25,14 +26,17 @@ module.exports = function(roles){
       if ('noPermissionRedirect' in req.app.get('permission')) {
         noPermissionRedirect = req.app.get('permission').noPermissionRedirect;
       }
+      if ('noPermissionStatus' in req.app.get('permission')) {
+        noPermissionStatus = req.app.get('permission').noPermissionStatus;
+      }
       if (req.app.get('permission').role){
         role = req.app.get('permission').role;
       }
     }
 
-    if (req.isAuthenticated() && !req.user[role]) { throw new Error("User doesn't have property named: " + 
+    if (req.isAuthenticated() && !req.user[role]) { throw new Error("User doesn't have property named: " +
                                                        role + ". See Advantage Start in docs") }
-    
+
 
     // checks passport integrated function
     if (req.isAuthenticated()) {
@@ -43,14 +47,14 @@ module.exports = function(roles){
       } else if (noPermissionRedirect != null) {
         res.redirect(noPermissionRedirect);
       } else {
-        res.status(401).send(null);
+        res.status(noPermissionStatus).send(null);
       }
     }
     else if (noPermissionRedirect != null) {
       res.redirect(noPermissionRedirect);
     }
     else {
-      res.status(401).send(null);
+      res.status(noPermissionStatus).send(null);
     }
   }
 }
