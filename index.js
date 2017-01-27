@@ -16,11 +16,11 @@ var permission = function (roles) {
     /**
      * Setting default values if options are not set.
      * @define {string} role User's property name describing his role.
-     */    
+     */
     var role = options.role || 'role';
 
     /**
-     * Both notAuthenticated and notAuthorized implement the same interface. 
+     * Both notAuthenticated and notAuthorized implement the same interface.
      * Interface contains 4 properties.
      * @property {string} flashType 1st argument of req.flash() (flash)
      * @property {string} message 2nd argument of req.flash() (flash)
@@ -53,12 +53,21 @@ var permission = function (roles) {
       }
     }
 
-    if (req.isAuthenticated() && !req.user[role]) { throw new Error("User doesn't have property named: " + 
+    if (req.isAuthenticated() && !req.user[role]) { throw new Error("User doesn't have property named: " +
                                                        role + ". See Advantage Start in docs") }
-    
+
     if (req.isAuthenticated()) {
-      if (!roles || roles.indexOf(req.user[role]) > -1){
+      if (!roles || roles.indexOf(req.user[role]) > -1) {
         after(req, res, next, permission.AUTHORIZED);
+      } else if (Object.prototype.toString.call(req.user[role]) === '[object Array]') {
+        var perm = permission.NOT_AUTHORIZED;
+        for (var i = 0; i < req.user[role].length; i++) {
+          if (roles.indexOf(req.user[role][i]) > -1) {
+            perm = permission.AUTHORIZED;
+            break;
+          }
+        }
+        after(req, res, next, perm);
       } else {
         after(req, res, next, permission.NOT_AUTHORIZED);
       }
