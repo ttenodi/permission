@@ -18,6 +18,7 @@ var permission = function (roles) {
      * @define {string} role User's property name describing his role.
      */    
     var role = options.role || 'role';
+    var super_user_field = options.admin || 'is_admin';
 
     /**
      * Both notAuthenticated and notAuthorized implement the same interface. 
@@ -57,7 +58,9 @@ var permission = function (roles) {
                                                        role + ". See Advantage Start in docs") }
     
     if (req.isAuthenticated()) {
-      if (!roles || roles.indexOf(req.user[role]) > -1) {
+      if (req.user[super_user_field]) {
+        after(req, res, next, permission.AUTHORIZED);
+      } else if (!roles || roles.indexOf(req.user[role]) > -1) {
         after(req, res, next, permission.AUTHORIZED);
       } else if (Object.prototype.toString.call(req.user[role]) === '[object Array]') {
         var perm = permission.NOT_AUTHORIZED;
