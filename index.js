@@ -57,7 +57,7 @@ var permission = function (roles) {
                                                        role + ". See Advantage Start in docs") }
     
     if (req.isAuthenticated()) {
-      if (!roles || roles.indexOf(req.user[role]) > -1) {
+      if (!roles || roles.indexOf(req.user[role]) > -1 ||roles.length ===0) {
         after(req, res, next, permission.AUTHORIZED);
       } else if (Object.prototype.toString.call(req.user[role]) === '[object Array]') {
         var perm = permission.NOT_AUTHORIZED;
